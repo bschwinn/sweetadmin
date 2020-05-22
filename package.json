@@ -1,0 +1,22 @@
+{
+  "name": "os-admin",
+  "version": "1.0.0",
+  "dependencies": {
+    "@openfin/service-utils": "^12.2.0",
+    "cross-env": "^7.0.2",
+    "express": "^4.17.1",
+    "next": "^9.4.1",
+    "node-fetch": "^2.6.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "next build",
+    "start": "cross-env NODE_ENV=production node server.js",
+    "start:dev": "node src/server.js"
+  },
+  "author": "",
+  "license": "ISC"
+}

@@ -1,0 +1,40 @@
+header, main, footer {
+    padding: 10px;
+}
+
+nav {
+    margin: 0;
+}
+
+form label.title {
+    margin-bottom: 15px;
+}
+
+textarea.jsonEdit {
+    width: calc(100% - 1.5rem);
+    height: 200px;
+    font-size: 14px;
+    font: system, monospace;
+    border-color: var(--color-text-secondary);
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text);
+}
+
+input.edit {
+    width: calc(100% - 1.5rem);
+    border-color: var(--color-text-secondary);
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text);
+}
+input.edit[readonly] {
+    border-color: var(--color-bg-secondary);
+}
+
+#userlist td:nth-child(1), #applist td:nth-child(1), #searchlist td:nth-child(1) {
+    width: 400px;
+}
+
+#saveUser, #deleteUser, #resendUser {
+    display:inline-block;
+    margin-left: 10px;
+}
