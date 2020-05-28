@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 function AppList ({apps}) {
     return (
         <form>
@@ -19,8 +21,9 @@ function AppList ({apps}) {
 
 function App (props) {
     const {app} = props;
+    console.log(app);
     return <tr>
-        <td title={app.description}>{app.title}</td>
+        <td title={app.description}><Link href="/admin/apps/[appname]" as={`/admin/apps/${app.name}`}><a>{app.title}</a></Link></td>
         <td>{app.publisher}</td>
     </tr>
 }

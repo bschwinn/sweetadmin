@@ -15,9 +15,9 @@ function Apps({ apps }) {
 export async function getServerSideProps(ctx) {
   const { res: apps, err } = await of(getApps(ctx));
   if (err) {
-      console.error('error getting user list', err);
+      console.error('error getting app list', err);
+      return { props : { apps: []}}
   }
-
   return {
     props: {
       apps: apps,

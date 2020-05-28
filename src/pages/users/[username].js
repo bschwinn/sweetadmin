@@ -1,5 +1,7 @@
+import React, { Children } from 'react'
 import Link from 'next/link'
-import { getUser, deleteUser, resendUser, updateUser, createUser, saveUser } from '../../api'
+
+import { getUser, deleteUser, resendUser, updateUser, createUser } from '../../api'
 import Layout from '../../components/layout'
 import { getUserSatus, formatUserSince, isUserTempPasswordExpired } from '../../utils';
 
@@ -14,67 +16,51 @@ function UserPage ({user}) {
 }
 
 export async function getServerSideProps(ctx) {
-    const { res: user, err } = await of(getUser(ctx, ctx.req.params.username));
-    if (err) {
-        console.error('error getting user list', err);
+    const username = ctx.req.params.username;
+    const userprops = { props : {}};
+    if (username !== '' && username !== 'new') {
+        const { res: user, err } = await of(getUser(ctx, username));
+        if (err) {
+            console.error('error getting user', err);
+            return userprops
+        }
+        userprops.props = {user};
+        return userprops;
     }
-  
-    return {
-      props: {
-          user: user,
-      },
-    }
+    return userprops;
 }
 
 class UserEdit extends React.Component {
     constructor(props) {
       super(props);
-      const {user} = props;
-      this.state = {
-        user: user
-      };
+      this.state = {...props.user};
   
       this.handleChange = this.handleChange.bind(this);
-      this.resendUser = this.resendUser.bind(this);
-      this.deleteUser = this.deleteUser.bind(this);
+      this.handleResend = this.handleResend.bind(this);
+      this.handleDelete = this.handleDelete.bind(this);
       this.handleSubmit = this.handleSubmit.bind(this);
+      this.handleError = this.handleError.bind(this);
     }
   
     handleChange(event) {
         const t = event.target;
-        const u = this.state.user;
-        switch(t.getAttribute('id')) {
-            case "firstName" :
-                u.firstName = t.value;
-                break;
-            case "lastName" :
-                u.lastName = t.value;
-                break;
-            case "phone" :
-                u.phone = t.value;
-                break;
-            case "isAdmin" :
-                u.isAdmin = t.checked;
-                break;
-        }
-        this.setState({user: u});
+        let val = ( t.name === 'isAdmin' ) ? (t.checked===true) : t.value;
+        this.setState({ [t.name]: val } );
     }
-    
-    async resendUser() {
+
+    async handleResend() {
         const { res: resp, err } = of(resendUser(this.state.user));
         if (err) {
-            // TODO display error message to user
-            console.error('error resending welcome/tmp-password to user', err);
+            this.handleError('error resending welcome/tmp-password to user', err);
             return;
         }
         window.location.href = '/admin/users';
     }
 
-    async deleteUser() {
+    async handleDelete() {
         const { res: resp, err } = of(deleteUser(this.state.user));
         if (err) {
-            // TODO display error message to user
-            console.error('error deleting user', err);
+            this.handleError('error deleting user', err);
             return;
         }
         window.location.href = '/admin/users';
@@ -83,69 +69,100 @@ class UserEdit extends React.Component {
     async handleSubmit(event) {
         event.preventDefault();
         const u = {
-            email: this.state.user.email,
-            phone: this.state.user.phone,
-            firstName: this.state.user.firstName,
-            lastName: this.state.user.lastName,
-            isAdmin: this.state.user.isAdmin
+            email: this.state.email,
+            phone: this.state.phone,
+            firstName: this.state.firstName,
+            lastName: this.state.lastName,
+            isAdmin: this.state.isAdmin
         }
-        const { res: resp, err } = of(saveUser(this.state.user.username, JSON.stringify(u)));
-        if (err) {
-            // TODO display error message to user
-            console.error('error saving user', err);
-            return;
+        if ( this.state.username ) {
+            const { res: resp, err } = await of(updateUser(this.state.username, JSON.stringify(u)));
+            if (err) {
+                this.handleError('error updating user', err)
+                return;
+            }
+        } else {
+            u.tmpPassword = this.state.password;
+            const { res: resp, err } = await of(createUser(JSON.stringify(u)));
+            if (err) {
+                this.handleError('error saving user', err)
+                return;
+            }
         }
         window.location.href = '/admin/users';
     }
-  
+
+    handleError(msg, err) {
+        console.error(msg, err);
+        const elem = document.querySelector('#userEdit label.title error');
+        elem.setAttribute('title', err.message)
+        elem.innerHTML = msg;
+    }
+    
     render() {
-      const user = this.state.user;
-      const userSince = new Date(user.created)
+      const { username, email, password, firstName, lastName, isAdmin, created, phone, enabled, status } = this.state
+      const userSince = new Date(created)
       return (
-        <form onSubmit={this.handleSubmit}>
-            <label className="title"><Link href="/admin/users"><a> &lt; </a></Link> Edit User</label>
+        <form id="userEdit" onSubmit={this.handleSubmit}>
+            <label className="title">{username ? `Editing ${email}` : 'New User'} <error></error></label>
+            <Renderer when={!username}>
             <label>
                 Email
-                <input id="email" className="edit" readOnly={true} value={user.email} />
+                <input type="text" name="email" onChange={this.handleChange} value={email} />
             </label>
             <label>
+                Temp Password
+                <input type="password" name="password" onChange={this.handleChange} value={password} />
+            </label>
+            </Renderer>
+            <label>
                 Name
-                <input id="firstName" className="edit" onChange={this.handleChange} value={user.firstName} />
+                <input type="text" name="firstName" onChange={this.handleChange} value={firstName} />
             </label>
             <label>
                 Last/Sur Name
-                <input id="lastName" className="edit" onChange={this.handleChange} value={user.lastName} />
+                <input type="text" name="lastName" onChange={this.handleChange} value={lastName} />
             </label>
             <label>
                 Phone
-                <input id="phone" className="edit" onChange={this.handleChange} value={user.phone} />
+                <input type="phone" name="phone" onChange={this.handleChange} value={phone} />
+            </label>
+            <Renderer when={username}>
+            <label>
+                User Status
+                <input readOnly={true} value={status + ' ' + getUserSatus(enabled, status, userSince)} />
             </label>
             <label>
                 User Since
-                <input className="edit" readOnly={true} value={formatUserSince(userSince)} />
+                <input readOnly={true} value={formatUserSince(userSince)} />
             </label>
-            <label>
-                User Status
-                <input className="edit" readOnly={true} value={user.status + ' ' + getUserSatus(user, userSince)} />
-            </label>
+            </Renderer>
             <label>
                 Admin ?
-                <input id="isAdmin" type="checkbox" onChange={this.handleChange} checked={user.isAdmin} />
+                <input type="checkbox" name="isAdmin" onChange={this.handleChange} checked={isAdmin} />
             </label>
-            <input id="saveUser" type="submit" value="Save" />
-            <input id="deleteUser" onClick={this.deleteUser} type="button" value="Delete" />
-            <Resend user={user} resend={this.resendUser}/>
+            <footer>
+                <Link href="/admin/users"><input type="button" value="Cancel" /></Link>
+                <input type="submit" value={username ? 'Update' : 'Save'} />
+                <Renderer when={isUserTempPasswordExpired(status, new Date(created))}>
+                    <input onClick={this.handleResend} type="button" value="Resend" />
+                </Renderer>
+                <Renderer when={username}>
+                    <input onClick={this.handleDelete}  type="button" value="Delete" />
+                </Renderer>
+            </footer>
         </form>
       );
     }
 }
 
-function Resend(props) {
-    const {user} = props;
-    if ( isUserTempPasswordExpired(user, new Date(user.created)) ) {
-        return <input id="resendUser" onClick={props.resend} type="button" value="Resend" />
+function Renderer({children, ...props}) {
+    const {when, whenFunc } = props;
+    let shouldRender = when;
+    if (whenFunc) {
+        shouldRender = whenFunc()
     }
-    return <span />
+    return shouldRender ? children : ''
 }
 
 export default UserPage

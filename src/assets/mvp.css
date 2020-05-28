@@ -23,7 +23,7 @@
     --width-content: 1080px;
 }
 
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
     :root {
         --color: #0097fc;
         --color-accent: #0097fc4f;
@@ -35,7 +35,7 @@
         --color-text: #f7f7f7;
         --color-text-secondary: #aaa;
     }
-}
+} */
 
 /* Layout */
 article aside {

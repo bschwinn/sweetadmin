@@ -3,6 +3,9 @@ import fetch from 'node-fetch'
 async function callAPIServer(ctx, path) {
     const res = await fetch(`${process.env.BASE_URL}/api/admin/${path}`, { headers: { cookie: ctx.req.headers.cookie }});
     const json = await res.json();
+    if (!res.ok) {
+        throw { status: res.status, code: json.code, message:json.message };
+    }
     return json;
 }
 
@@ -14,6 +17,9 @@ async function callAPI(path, method, body) {
     }
     const res = await fetch(`/api/admin/${path}`, opts);
     const json = await res.json();
+    if (!res.ok) {
+        throw { status: res.status, code: json.code, message:json.message };
+    }
     return json;
 }
 
@@ -24,6 +30,10 @@ export async function getApps(ctx) {
 
 export async function getApp(ctx, appname) {
     return callAPIServer(ctx, `apps/${appname}`, 'GET');
+}
+
+export async function saveApp(ctx, appname, updates) {
+    return callAPI(`apps/${appname}`, 'GET', updates);
 }
 
 
@@ -46,7 +56,11 @@ export async function getUser(ctx, username) {
     return callAPIServer(ctx, `users/${username}`, 'GET');
 }
 
-export async function saveUser(username, updates) {
+export async function createUser(user) {
+    return callAPI(`users`, 'POST', user);
+}
+
+export async function updateUser(username, updates) {
     return callAPI(`users/${username}`, 'PUT', updates);
 }
 

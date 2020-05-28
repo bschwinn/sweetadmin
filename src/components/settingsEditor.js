@@ -44,16 +44,18 @@ class SettingsEditor extends React.Component {
   
     render() {
       return (
-        <form onSubmit={this.handleSubmit}>
+        <form id="settingsEdit" onSubmit={this.handleSubmit}>
           <div>
             <label>Organization Settings</label>
-            <textarea className="jsonEdit" onChange={this.handleSettingsChange} value={this.state.settings} />
+            <textarea onChange={this.handleSettingsChange} value={this.state.settings} />
           </div>
           <div>
             <label>Manifest Overrides</label>
-            <textarea className="jsonEdit" onChange={this.handleManifestChange} value={this.state.manifest} />
+            <textarea onChange={this.handleManifestChange} value={this.state.manifest} />
           </div>
-          <input type="submit" value="Save" />
+          <footer>
+              <input type="submit" value="Save" />
+          </footer>          
         </form>
       );
     }

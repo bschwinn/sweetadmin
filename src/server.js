@@ -26,6 +26,10 @@ app.prepare().then(() => {
     return app.render(req, res, '/apps', req.query)
   })
 
+  server.get('/admin/apps/:appname', (req, res) => {
+    return app.render(req, res, '/apps/[appname]', req.query)
+  })
+
   server.get('/admin/settings', (req, res) => {
     return app.render(req, res, '/settings', req.query)
   })

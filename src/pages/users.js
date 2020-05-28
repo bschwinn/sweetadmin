@@ -16,8 +16,8 @@ export async function getServerSideProps(ctx) {
   const { res: users, err } = await of(getUsers(ctx));
   if (err) {
       console.error('error getting user list', err);
+      return { props : { users: []}}
   }
-
   return {
     props: {
         users: users,

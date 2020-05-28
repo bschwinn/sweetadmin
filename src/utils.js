@@ -8,8 +8,8 @@ export function getUserName(user) {
     return name;
 }
 
-export function isUserTempPasswordExpired(user, userSince) {
-    if (user.status === 'FORCE_CHANGE_PASSWORD') {
+export function isUserTempPasswordExpired(status, userSince) {
+    if (status === 'FORCE_CHANGE_PASSWORD') {
         const diff = new Date().getTime() - userSince.getTime();
         const limit = 86400000 * 30;
         if (diff > limit) {
@@ -18,15 +18,15 @@ export function isUserTempPasswordExpired(user, userSince) {
     }
     return false;
 }
-export function getUserSatus(user, userSince) {
+export function getUserSatus(enabled, status, userSince) {
     let ret = '👍';
-    if (!user.enabled) {
+    if (!enabled) {
         ret = '💔';
     }
-    if (user.status === 'FORCE_CHANGE_PASSWORD') {
+    if (status === 'FORCE_CHANGE_PASSWORD') {
         ret = '🤷';
     }
-    if (isUserTempPasswordExpired(user, userSince)) {
+    if (isUserTempPasswordExpired(status, userSince)) {
         const diff = new Date().getTime() - userSince.getTime();
         const limit = 86400000 * 30;
         if (diff > limit) {
@@ -37,6 +37,9 @@ export function getUserSatus(user, userSince) {
 }
 
 export function formatUserSince(userSince) {
+    if (isNaN(Date.parse(userSince))) {
+        return '';
+    }
     const dtf = new Intl.DateTimeFormat('en', { year: 'numeric', month: 'short', day: '2-digit' });
     const [{ value: month },,{ value: day },,{ value: year }] = dtf.formatToParts(userSince);
     return `${month} ${day} ${year}`;
