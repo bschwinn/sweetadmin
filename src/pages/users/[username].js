@@ -1,8 +1,8 @@
-import React, { Children } from 'react'
+import React from 'react'
 import Link from 'next/link'
 
-import { getUser, deleteUser, resendUser, updateUser, createUser } from '../../api'
 import Layout from '../../components/layout'
+import { getUser, deleteUser, resendUser, updateUser, createUser } from '../../api'
 import { getUserSatus, formatUserSince, isUserTempPasswordExpired } from '../../utils';
 
 import of from '@openfin/service-utils/modules/misc/of';
@@ -15,9 +15,17 @@ function UserPage ({user}) {
     )
 }
 
+const emptyUser = {
+    email : "",
+    password: "",
+    firstName: "",
+    lastName: "",
+    isAdmin: false
+}
+
 export async function getServerSideProps(ctx) {
     const username = ctx.req.params.username;
-    const userprops = { props : {}};
+    const userprops = { props : { user: {...emptyUser}} };
     if (username !== '' && username !== 'new') {
         const { res: user, err } = await of(getUser(ctx, username));
         if (err) {
@@ -49,7 +57,7 @@ class UserEdit extends React.Component {
     }
 
     async handleResend() {
-        const { res: resp, err } = of(resendUser(this.state.user));
+        const { res: resp, err } = of(resendUser(this.state.email));
         if (err) {
             this.handleError('error resending welcome/tmp-password to user', err);
             return;
@@ -58,7 +66,7 @@ class UserEdit extends React.Component {
     }
 
     async handleDelete() {
-        const { res: resp, err } = of(deleteUser(this.state.user));
+        const { res: resp, err } = of(deleteUser(this.state.username));
         if (err) {
             this.handleError('error deleting user', err);
             return;
@@ -105,16 +113,16 @@ class UserEdit extends React.Component {
       return (
         <form id="userEdit" onSubmit={this.handleSubmit}>
             <label className="title">{username ? `Editing ${email}` : 'New User'} <error></error></label>
-            <Renderer when={!username}>
+            {!username &&
             <label>
                 Email
                 <input type="text" name="email" onChange={this.handleChange} value={email} />
-            </label>
+            </label>}
+            {!username &&
             <label>
                 Temp Password
                 <input type="password" name="password" onChange={this.handleChange} value={password} />
-            </label>
-            </Renderer>
+            </label>}
             <label>
                 Name
                 <input type="text" name="firstName" onChange={this.handleChange} value={firstName} />
@@ -125,18 +133,16 @@ class UserEdit extends React.Component {
             </label>
             <label>
                 Phone
-                <input type="phone" name="phone" onChange={this.handleChange} value={phone} />
+                <input type="text" name="phone" onChange={this.handleChange} value={phone} />
             </label>
-            <Renderer when={username}>
-            <label>
+            { username && <label>
                 User Status
-                <input readOnly={true} value={status + ' ' + getUserSatus(enabled, status, userSince)} />
-            </label>
-            <label>
+                <input type="text" readOnly={true} value={status + ' ' + getUserSatus(enabled, status, userSince)} />
+            </label>}
+            { username && <label>
                 User Since
-                <input readOnly={true} value={formatUserSince(userSince)} />
-            </label>
-            </Renderer>
+                <input type="text" readOnly={true} value={formatUserSince(userSince)} />
+            </label>}
             <label>
                 Admin ?
                 <input type="checkbox" name="isAdmin" onChange={this.handleChange} checked={isAdmin} />
@@ -144,25 +150,12 @@ class UserEdit extends React.Component {
             <footer>
                 <Link href="/admin/users"><input type="button" value="Cancel" /></Link>
                 <input type="submit" value={username ? 'Update' : 'Save'} />
-                <Renderer when={isUserTempPasswordExpired(status, new Date(created))}>
-                    <input onClick={this.handleResend} type="button" value="Resend" />
-                </Renderer>
-                <Renderer when={username}>
-                    <input onClick={this.handleDelete}  type="button" value="Delete" />
-                </Renderer>
+                { isUserTempPasswordExpired(status, new Date(created)) && <input onClick={this.handleResend} type="button" value="Resend" />}
+                { username && <input onClick={this.handleDelete} type="button" value="Delete" />}
             </footer>
         </form>
       );
     }
-}
-
-function Renderer({children, ...props}) {
-    const {when, whenFunc } = props;
-    let shouldRender = when;
-    if (whenFunc) {
-        shouldRender = whenFunc()
-    }
-    return shouldRender ? children : ''
 }
 
 export default UserPage

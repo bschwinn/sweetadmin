@@ -64,12 +64,12 @@ export async function updateUser(username, updates) {
     return callAPI(`users/${username}`, 'PUT', updates);
 }
 
-export async function deleteUser(user) {
-    return callAPI(`users/${user.username}`, 'DELETE');
+export async function deleteUser(username) {
+    return callAPI(`users/${username}`, 'DELETE');
 }
 
-export async function resendUser(user) {
-    return callAPI(`users/${user.email}/resend`, 'POST');
+export async function resendUser(email) {
+    return callAPI(`users/${email}/resend`, 'POST');
 }
 
 

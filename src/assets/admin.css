@@ -78,14 +78,13 @@ form footer {
     padding: 0;
 }
 
-form footer input[type=button],form footer input[type=submit] {
+form footer input[type=submit], form footer input[type=button] {
     display:inline-block;
     margin-left: 10px;
 }
-form footer input[type=button]:nth-child(1), form footer input[type=submit]:nth-child(1) {
+form footer input[type=submit]:nth-child(1),form footer input[type=button]:nth-child(1) {
     margin-left: 0;
 }
-
 form footer input[type=submit] {
     background-color: var(--color);
     color: var(--color-bg);
@@ -100,7 +99,7 @@ form footer input[type=submit] {
     font: system, monospace;
 }
 
-#userEdit input, #appEdit input {
+#userEdit input[type=text], #userEdit input[type=password], #appEdit input[type=text] {
     width: calc(100% - 1.5rem);
 }
 #userEdit label, #appEdit label {
