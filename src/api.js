@@ -85,3 +85,19 @@ export async function resendUser(email) {
 export async function getSearchEngines(ctx) {
     return callAPIServer(ctx, "search-engines", 'GET');
 }
+
+export async function getSearchEngine(ctx, name) {
+    return callAPIServer(ctx, `search-engines/${name}`, 'GET');
+}
+
+export async function createSearchEngine(engin) {
+    return callAPI(`search-engines`, 'POST', engin);
+}
+
+export async function updateSearchEngine(name, updates) {
+    return callAPI(`search-engines/${name}`, 'PUT', updates);
+}
+
+export async function deleteSearchEngine(name) {
+    return callAPI(`search-engines/${name}`, 'DELETE');
+}

@@ -21,11 +21,10 @@ function AppList ({apps}) {
 
 function App (props) {
     const {app} = props;
-    console.log(app);
     return <tr>
         <td title={app.description}><Link href="/admin/apps/[appname]" as={`/admin/apps/${app.name}`}><a>{app.title}</a></Link></td>
         <td>{app.publisher}</td>
-        <td><img src={app.icon} /></td>
+        <td><img className="appicon" src={app.icon} /></td>
     </tr>
 }
 

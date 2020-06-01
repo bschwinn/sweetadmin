@@ -1,44 +1,44 @@
 import Link from 'next/link'
-import { getApp, createApp, updateApp, deleteApp } from '../../api'
+import { getSearchEngine, createSearchEngine, updateSearchEngine, deleteSearchEngine } from '../../api'
 import Layout from '../../components/layout'
 
 import of from '@openfin/service-utils/modules/misc/of';
 
-function AppPage ({app}) {
+function SearchPage ({search}) {
     return (
         <Layout page="Edit App">
-            <AppEdit app={app} />
+            <SearchEdit search={search} />
         </Layout>
     )
 }
 
-const emptyApp = {
+const emptySearch = {
     name : "",
     title: "",
     description: "",
-    manifest: "",
-    icons: []
+    url: "",
+    icon: ""
 }
 
 export async function getServerSideProps(ctx) {
-    const appname = ctx.req.params.appname;
-    const appprops = { props : { user: {...emptyApp}} };
-    if (appname !== '' && appname !== 'new') {
-        const { res: app, err } = await of(getApp(ctx, appname));
+    const searchname = ctx.req.params.searchname;
+    const searchprops = { props : { search: {...emptySearch}} };
+    if (searchname !== '' && searchname !== 'new') {
+        const { res: search, err } = await of(getSearchEngine(ctx, searchname));
         if (err) {
-            console.error('error getting user', err);
-            return appprops
+            console.error('error getting search', err);
+            return searchprops
         }
-        appprops.props = {app};
-        return appprops;
+        searchprops.props = {search};
+        return searchprops;
     }
-    return appprops;
+    return searchprops;
 }
 
-class AppEdit extends React.Component {
+class SearchEdit extends React.Component {
     constructor(props) {
       super(props);
-      this.state = {...props.app};
+      this.state = {...props.search};
   
       this.handleChange = this.handleChange.bind(this);
       this.handleDelete = this.handleDelete.bind(this);
@@ -47,60 +47,57 @@ class AppEdit extends React.Component {
   
     handleChange(event) {
         const t = event.target;
-        let val = ( t.name === 'isAdmin' ) ? (t.checked===true) : t.value;
-        this.setState({ [t.name]: val } );
+        this.setState({ [t.name]: t.value } );
     }
     
     async handleDelete() {
-        const { res: resp, err } = of(deleteApp(this.state.name));
+        const { res: resp, err } = of(deleteSearchEngine(this.state.name));
         if (err) {
-            this.handleError('error deleting app', err);
+            this.handleError('error deleting search', err);
             return;
         }
-        window.location.href = '/admin/apps';
+        window.location.href = '/admin/searches';
     }
 
     async handleSubmit(event) {
         event.preventDefault();
         const app = {
-            application: {
+            engine: {
                 name: this.state.name,
                 title: this.state.title,
                 description: this.state.description,
-                manifest: this.state.manifest,
-                icons: [
-                    {icon: this.state.icon}
-                ]
+                url: this.state.url,
+                icon: this.state.icon
             }
         }
         if ( this.state.id ) {
-            const { res: resp, err } = of(updateApp(this.state.id, JSON.stringify(app)));
+            const { res: resp, err } = of(updateSearchEngine(this.state.id, JSON.stringify(app)));
             if (err) {
-                this.handleError('error updating app', err)
+                this.handleError('error updating search', err)
                 return;
             }
         } else {
-            const { res: resp, err } = await of(createApp(JSON.stringify(app)));
+            const { res: resp, err } = await of(createSearchEngine(JSON.stringify(app)));
             if (err) {
-                this.handleError('error creating app', err)
+                this.handleError('error creating search', err)
                 return;
             }
         }
-        window.location.href = '/admin/apps';
+        window.location.href = '/admin/searches';
     }
   
     handleError(msg, err) {
         console.error(msg, err);
-        const elem = document.querySelector('#appEdit label.title error');
+        const elem = document.querySelector('#searchEdit label.title error');
         elem.setAttribute('title', err.message)
         elem.innerHTML = msg;
     }
 
     render() {
-      const {id, name, title, description, manifest, icon } = this.state;
+      const {id, name, title, description, url, icon } = this.state;
       return (
-        <form id="appEdit" onSubmit={this.handleSubmit}>
-            <label className="title">{id ? `Editing ${name}` : 'New App'} <error></error></label>
+        <form id="searchEdit" onSubmit={this.handleSubmit}>
+            <label className="title">{id ? `Editing ${name}` : 'New Search'} <error></error></label>
             <label>
                 Name
                 <input type="text" name="name" onChange={this.handleChange} value={name} />
@@ -114,8 +111,8 @@ class AppEdit extends React.Component {
                 <input type="text" name="description" onChange={this.handleChange} value={description} />
             </label>
             <label>
-                Manifest
-                <input type="text" name="manifest" onChange={this.handleChange} value={manifest} />
+                Endpoint URL
+                <input type="text" name="url" onChange={this.handleChange} value={url} />
             </label>
             <label>
                 Icon
@@ -130,4 +127,5 @@ class AppEdit extends React.Component {
     }
 }
 
-export default AppPage
+
+export default SearchPage

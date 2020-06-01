@@ -1,10 +1,13 @@
+import Link from 'next/link'
+
 function Searches ({searches}) {
     return (
         <table id="searchlist">
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Publisher</th>
+                <th>Title</th>
+                <th>Provider</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -16,10 +19,11 @@ function Searches ({searches}) {
 
 function Search (props) {
     const {search} = props;
-    // console.log(search);
+    console.log(search);
     return <tr>
-        <td>{search.url}</td>
-        <td>{search.publisher}</td>
+        <td title={search.description}><Link href="/admin/searches/[searchname]" as={`/admin/searches/${search.name}`}><a>{search.title}</a></Link></td>
+        <td>{search.provider}</td>
+        <td><img className="appicon" src={search.icon} /></td>
     </tr>
 }
 

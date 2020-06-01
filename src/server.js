@@ -18,16 +18,20 @@ app.prepare().then(() => {
     return app.render(req, res, '/users/[username]', req.query)
   })
 
-  server.get('/admin/searches', (req, res) => {
-    return app.render(req, res, '/searches', req.query)
-  })
-
   server.get('/admin/apps', (req, res) => {
     return app.render(req, res, '/apps', req.query)
   })
 
   server.get('/admin/apps/:appname', (req, res) => {
     return app.render(req, res, '/apps/[appname]', req.query)
+  })
+
+  server.get('/admin/searches', (req, res) => {
+    return app.render(req, res, '/searches', req.query)
+  })
+
+  server.get('/admin/searches/:searchname', (req, res) => {
+    return app.render(req, res, '/searches/[searchname]', req.query)
   })
 
   server.get('/admin/settings', (req, res) => {

@@ -6,7 +6,13 @@
 
     --color-text-error: red;
 }
-/* @media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color: #ffffff;
+        --color-secondary: #cccccc;
+        --color-accent: #ffffff15;
+        --color-secondary-accent: #cccccc0b;    
+    }
     textarea {
         border-color: var(--color-text-secondary);
         background-color: var(--color-bg-secondary);
@@ -21,7 +27,7 @@
     input[readonly] {
         border-color: var(--color-bg-secondary);
     }
-} */
+}
 
 body, main, footer {
     padding: 0;
@@ -99,18 +105,25 @@ form footer input[type=submit] {
     font: system, monospace;
 }
 
-#userEdit input[type=text], #userEdit input[type=password], #appEdit input[type=text] {
+#userEdit input[type=text], #userEdit input[type=password], #appEdit input[type=text], #searchEdit input[type=text] {
     width: calc(100% - 1.5rem);
 }
-#userEdit label, #appEdit label {
+#userEdit label, #appEdit label, #searchEdit label {
     margin-bottom: 15px;
 }
 
-#userEdit label error, #appEdit label error {
+#userEdit label error, #appEdit label error, #searchEdit label error {
     font-size: 0.75rem;
     color: var(--color-text-error);
 }
 
 #userlist td:nth-child(1), #applist td:nth-child(1), #searchlist td:nth-child(1) {
     width: 400px;
+}
+
+.appicon {
+    padding: 0;
+    margin: 0;
+    max-height: 20px;
+    max-width: 20px;
 }
