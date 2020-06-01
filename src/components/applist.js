@@ -3,12 +3,12 @@ import Link from 'next/link'
 function AppList ({apps}) {
     return (
         <form>
-            <label>Organization Apps</label>
             <table id="applist">
                 <thead>
                     <tr>
-                        <th>Name</th>
+                        <th>Title</th>
                         <th>Publisher</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -25,6 +25,7 @@ function App (props) {
     return <tr>
         <td title={app.description}><Link href="/admin/apps/[appname]" as={`/admin/apps/${app.name}`}><a>{app.title}</a></Link></td>
         <td>{app.publisher}</td>
+        <td><img src={app.icon} /></td>
     </tr>
 }
 

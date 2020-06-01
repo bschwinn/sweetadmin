@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getApp, saveApp } from '../../api'
+import { getApp, createApp, updateApp, deleteApp } from '../../api'
 import Layout from '../../components/layout'
 
 import of from '@openfin/service-utils/modules/misc/of';
@@ -12,80 +12,115 @@ function AppPage ({app}) {
     )
 }
 
+const emptyApp = {
+    name : "",
+    title: "",
+    description: "",
+    manifest: "",
+    icons: []
+}
+
 export async function getServerSideProps(ctx) {
-    const { res: app, err } = await of(getApp(ctx, ctx.req.params.appname));
-    if (err) {
-        console.error('error getting app', err);
+    const appname = ctx.req.params.appname;
+    const appprops = { props : { user: {...emptyApp}} };
+    if (appname !== '' && appname !== 'new') {
+        const { res: app, err } = await of(getApp(ctx, ctx.req.params.appname));
+        if (err) {
+            console.error('error getting user', err);
+            return appprops
+        }
+        appprops.props = {app};
+        return appprops;
     }
-  
-    return {
-      props: {
-        app: app,
-      },
-    }
+    return appprops;
 }
 
 class AppEdit extends React.Component {
     constructor(props) {
       super(props);
-      const {app} = props;
-      this.state = {
-        app: app
-      };
+      this.state = {...props.app};
   
+      console.log(this.state);
       this.handleChange = this.handleChange.bind(this);
+      this.handleDelete = this.handleDelete.bind(this);
       this.handleSubmit = this.handleSubmit.bind(this);
     }
   
     handleChange(event) {
         const t = event.target;
-        const a = this.state.app;
-        switch(t.getAttribute('id')) {
-            case "name" :
-                a.name = t.value;
-                break;
-            case "title" :
-                a.title = t.value;
-                break;
-            case "description" :
-                a.description = t.value;
-                break;
-        }
-        this.setState({app: a});
+        let val = ( t.name === 'isAdmin' ) ? (t.checked===true) : t.value;
+        this.setState({ [t.name]: val } );
     }
     
-    async handleSubmit(event) {
-        event.preventDefault();
-        const app = {
-            name: this.state.app.name,
-            title: this.state.app.title,
-            description: this.state.app.description
-        }
-        const { res: resp, err } = of(saveApp(this.state.app.name, JSON.stringify(app)));
+    async handleDelete() {
+        const { res: resp, err } = of(deleteApp(this.state.name));
         if (err) {
-            // TODO display error message to user
-            console.error('error saving app', err);
+            this.handleError('error deleting app', err);
             return;
         }
         window.location.href = '/admin/apps';
     }
+
+    async handleSubmit(event) {
+        event.preventDefault();
+        const app = {
+            application: {
+                name: this.state.name,
+                title: this.state.title,
+                description: this.state.description,
+                manifest: this.state.manifest,
+                icons: [
+                    {icon: this.state.icon}
+                ]
+            }
+        }
+        if ( this.state.id ) {
+            const { res: resp, err } = of(updateApp(this.state.id, JSON.stringify(app)));
+            if (err) {
+                this.handleError('error updating app', err)
+                return;
+            }
+        } else {
+            const { res: resp, err } = await of(createApp(JSON.stringify(app)));
+            if (err) {
+                this.handleError('error creating app', err)
+                return;
+            }
+        }
+        window.location.href = '/admin/apps';
+    }
   
+    handleError(msg, err) {
+        console.error(msg, err);
+        const elem = document.querySelector('#appEdit label.title error');
+        elem.setAttribute('title', err.message)
+        elem.innerHTML = msg;
+    }
+
     render() {
-      const app = this.state.app;
+      const {id, name, title, description, manifest, icon } = this.state;
       return (
-        <form onSubmit={this.handleSubmit}>
-            <label className="title"><Link href="/admin/apps"><a> &lt; </a></Link> Edit App</label>
+        <form id="appEdit" onSubmit={this.handleSubmit}>
+            <label className="title">{id ? `Editing ${name}` : 'New App'} <error></error></label>
             <label>
                 Name
-                <input id="name" className="edit" onChange={this.handleChange} value={app.name} />
+                <input type="text" name="name" onChange={this.handleChange} value={name} />
             </label>
             <label>
                 Title
-                <input id="title" className="edit" onChange={this.handleChange} value={app.title} />
+                <input type="text" name="title" onChange={this.handleChange} value={title} />
             </label>
             <label>
                 Description
-                <input id="description" className="edit" onChange={this.handleChange} value={app.description} />
+                <input type="text" name="description" onChange={this.handleChange} value={description} />
+            </label>
+            <label>
+                Manifest
+                <input type="text" name="manifest" onChange={this.handleChange} value={manifest} />
+            </label>
+            <label>
+                Icon
+                <input type="text" name="icon" onChange={this.handleChange} value={icon} />
             </label>
             <footer>
                 <Link href="/admin/apps"><input type="button" value="Cancel" /></Link>

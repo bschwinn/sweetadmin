@@ -32,8 +32,16 @@ export async function getApp(ctx, appname) {
     return callAPIServer(ctx, `apps/${appname}`, 'GET');
 }
 
-export async function saveApp(ctx, appname, updates) {
-    return callAPI(`apps/${appname}`, 'GET', updates);
+export async function createApp(app) {
+    return callAPI(`apps`, 'POST', app);
+}
+
+export async function updateApp(appname, updates) {
+    return callAPI(`apps/${appname}`, 'PUT', updates);
+}
+
+export async function deleteApp(appname) {
+    return callAPI(`apps/${appname}`, 'DELETE');
 }
 
 

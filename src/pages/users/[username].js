@@ -93,7 +93,7 @@ class UserEdit extends React.Component {
             u.tmpPassword = this.state.password;
             const { res: resp, err } = await of(createUser(JSON.stringify(u)));
             if (err) {
-                this.handleError('error saving user', err)
+                this.handleError('error creating user', err)
                 return;
             }
         }
